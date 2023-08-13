@@ -1,13 +1,13 @@
 package com.example.loans.repository;
 
 import com.example.loans.model.Loan;
-import org.hibernate.type.descriptor.converter.spi.JpaAttributeConverter;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface LoanRepository extends JpaAttributeConverter<Loan, Integer> {
+public interface LoanRepository extends JpaRepository<Loan, Integer> {
 
     List<Loan> findByCustomerIdOrderByStartDtDesc(int customerId);
 }
