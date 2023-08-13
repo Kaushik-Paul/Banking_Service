@@ -1,12 +1,16 @@
 package com.example.loans.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.sql.Date;
 
+@Entity
+@Getter
+@Setter
+@ToString
 public class Loan {
 
     @Id
