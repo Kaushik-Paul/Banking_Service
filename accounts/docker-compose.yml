@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+
+  accounts:
+    image: kaushikpaul/banking-service-accounts:latest
+    mem_limit: 700m
+    ports:
+      - "8080:8080"
+    networks:
+      - banking-service-network
+
+  loans:
+    image: kaushikpaul/banking-service-loans:latest
+    mem_limit: 700m
+    ports:
+      - "8090:8090"
+    networks:
+      - banking-service-network
+
+  cards:
+    image: kaushikpaul/banking-service-cards:latest
+    mem_limit: 700m
+    ports:
+      - "9000:9000"
+    networks:
+      - banking-service-network
+
+networks:
+  banking-service-network:
