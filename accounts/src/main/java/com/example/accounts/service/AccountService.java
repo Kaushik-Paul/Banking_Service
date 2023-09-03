@@ -19,11 +19,7 @@ public class AccountService {
     public Account getAccountByCustomerId(int customerId) {
         Customer customer = customerRepository.findById(customerId).get();
 
-        System.out.println("CUSTOMER ===>>> " + customer);
-
         Account account = accountRepository.findByCustomerId(customer.getCustomerId());
-
-        System.out.println("ACCOUNT =====>>> " + account);
         return account;
     }
 }

@@ -1,16 +1,17 @@
 package com.example.accounts.controller;
 
 import com.example.accounts.config.AccountServiceConfig;
-import com.example.accounts.model.Account;
-import com.example.accounts.model.Properties;
+import com.example.accounts.model.*;
 import com.example.accounts.service.AccountService;
+import com.example.accounts.service.clients.CardsFeignClient;
+import com.example.accounts.service.clients.LoansFeignClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class AccountController {
@@ -20,6 +21,12 @@ public class AccountController {
 
     @Autowired
     private AccountServiceConfig accountConfig;
+
+    @Autowired
+    private CardsFeignClient cardsFeignClient;
+
+    @Autowired
+    private LoansFeignClient loansFeignClient;
 
     @GetMapping("/my-account/")
     public Account getAccountDetails(@RequestParam int id) {
@@ -34,5 +41,20 @@ public class AccountController {
         Properties properties = new Properties(accountConfig.getMsg(), accountConfig.getBuildVersion(), accountConfig.getMailDetails(), accountConfig.getActiveBranches());
         String jsonStr = ow.writeValueAsString(properties);
         return jsonStr;
+    }
+
+    @PostMapping("/my-customer-details")
+    public CustomerDetails myCustomerDetails(@RequestBody Customer customer) {
+        Account account = accountService.getAccountByCustomerId(customer.getCustomerId());
+        List<Loans> loans = loansFeignClient.getLoansDetails(customer);
+        List<Cards> cards = cardsFeignClient.getCardDetails(customer);
+
+        CustomerDetails customerDetails = new CustomerDetails();
+        customerDetails.setAccount(account);
+        customerDetails.setLoans(loans);
+        customerDetails.setCards(cards);
+
+        return customerDetails;
+
     }
 }
