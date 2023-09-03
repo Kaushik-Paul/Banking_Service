@@ -9,6 +9,26 @@ services:
       - "8071:8071"
     networks:
      - banking-service-network
+
+  eurekaserver:
+    image:  kaushikpaul/banking-service-eurekaserver:latest
+    mem_limit: 700m
+    ports:
+      - "8070:8070"
+    networks:
+      - banking-service-network
+    depends_on:
+      - configserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 15s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_APPLICATION_NAME: eurekaserver
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
       
   accounts:
     image: kaushikpaul/banking-service-accounts:latest
@@ -19,6 +39,7 @@ services:
       - banking-service-network
     depends_on:
       - configserver
+      - eurekaserver
     deploy:
       restart_policy:
         condition: on-failure
@@ -29,6 +50,7 @@ services:
       SPRING_APPLICATION_NAME: accounts
       SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
   
   loans:
     image: kaushikpaul/banking-service-loans:latest
@@ -39,6 +61,7 @@ services:
       - banking-service-network
     depends_on:
       - configserver
+      - eurekaserver
     deploy:
       restart_policy:
         condition: on-failure
@@ -49,6 +72,7 @@ services:
       SPRING_APPLICATION_NAME: loans
       SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
     
   cards:
     image: kaushikpaul/banking-service-cards:latest
@@ -59,6 +83,7 @@ services:
       - banking-service-network
     depends_on:
       - configserver
+      - eurekaserver
     deploy:
       restart_policy:
         condition: on-failure
@@ -69,6 +94,7 @@ services:
       SPRING_APPLICATION_NAME: cards
       SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
       
 networks:
   banking-service-network:
