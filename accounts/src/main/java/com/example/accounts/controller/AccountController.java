@@ -8,6 +8,7 @@ import com.example.accounts.service.clients.LoansFeignClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,6 +45,7 @@ public class AccountController {
     }
 
     @PostMapping("/my-customer-details")
+    @CircuitBreaker(name="detailsForCustomerSupportApp")
     public CustomerDetails myCustomerDetails(@RequestBody Customer customer) {
         Account account = accountService.getAccountByCustomerId(customer.getCustomerId());
         List<Loans> loans = loansFeignClient.getLoansDetails(customer);
