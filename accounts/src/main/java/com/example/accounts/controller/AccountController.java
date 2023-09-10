@@ -45,7 +45,7 @@ public class AccountController {
     }
 
     @PostMapping("/my-customer-details")
-    @CircuitBreaker(name="detailsForCustomerSupportApp")
+    @CircuitBreaker(name="detailsForCustomerSupportApp", fallbackMethod = "myCustomerDetailsFallback")
     public CustomerDetails myCustomerDetails(@RequestBody Customer customer) {
         Account account = accountService.getAccountByCustomerId(customer.getCustomerId());
         List<Loans> loans = loansFeignClient.getLoansDetails(customer);
@@ -56,6 +56,18 @@ public class AccountController {
         customerDetails.setLoans(loans);
         customerDetails.setCards(cards);
 
+        return customerDetails;
+
+    }
+
+    // Fallback method for circuit breaker detailsForCustomerSupportApp
+    public CustomerDetails myCustomerDetailsFallBack(Customer customer, Throwable t) {
+        System.out.println("THIS IS FALLBACK");
+        Account account = accountService.getAccountByCustomerId(customer.getCustomerId());
+        List<Loans> loans = loansFeignClient.getLoansDetails(customer);
+        CustomerDetails customerDetails = new CustomerDetails();
+        customerDetails.setAccount(account);
+        customerDetails.setLoans(loans);
         return customerDetails;
 
     }
