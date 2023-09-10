@@ -8,7 +8,7 @@ import com.example.accounts.service.clients.LoansFeignClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,7 +45,8 @@ public class AccountController {
     }
 
     @PostMapping("/my-customer-details")
-    @CircuitBreaker(name="detailsForCustomerSupportApp", fallbackMethod = "myCustomerDetailsFallback")
+//    @CircuitBreaker(name="detailsForCustomerSupportApp", fallbackMethod = "myCustomerDetailsFallBack")
+    @Retry(name = "retryForCustomerDetails", fallbackMethod = "myCustomerDetailsFallBack")
     public CustomerDetails myCustomerDetails(@RequestBody Customer customer) {
         Account account = accountService.getAccountByCustomerId(customer.getCustomerId());
         List<Loans> loans = loansFeignClient.getLoansDetails(customer);
@@ -62,7 +63,6 @@ public class AccountController {
 
     // Fallback method for circuit breaker detailsForCustomerSupportApp
     public CustomerDetails myCustomerDetailsFallBack(Customer customer, Throwable t) {
-        System.out.println("THIS IS FALLBACK");
         Account account = accountService.getAccountByCustomerId(customer.getCustomerId());
         List<Loans> loans = loansFeignClient.getLoansDetails(customer);
         CustomerDetails customerDetails = new CustomerDetails();
