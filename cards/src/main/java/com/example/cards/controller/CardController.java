@@ -9,10 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,7 +23,7 @@ public class CardController {
     private CardServiceConfig cardConfig;
 
     @PostMapping("my-cards")
-    public List<Card> getCardDetailsOfCustomer(@RequestBody Customer customer) {
+    public List<Card> getCardDetailsOfCustomer(@RequestHeader("bank-service-correlation-id") String correlationId, @RequestBody Customer customer) {
         return cardService.getAllCardDetails(customer.getCustomerId());
     }
 
