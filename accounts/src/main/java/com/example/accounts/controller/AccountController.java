@@ -48,10 +48,10 @@ public class AccountController {
     @PostMapping("/my-customer-details")
 //    @CircuitBreaker(name="detailsForCustomerSupportApp", fallbackMethod = "myCustomerDetailsFallBack")
     @Retry(name = "retryForCustomerDetails", fallbackMethod = "myCustomerDetailsFallBack")
-    public CustomerDetails myCustomerDetails(@RequestBody Customer customer) {
+    public CustomerDetails myCustomerDetails(@RequestHeader("bank-service-correlation-id") String correlationId, @RequestBody Customer customer) {
         Account account = accountService.getAccountByCustomerId(customer.getCustomerId());
-        List<Loans> loans = loansFeignClient.getLoansDetails(customer);
-        List<Cards> cards = cardsFeignClient.getCardDetails(customer);
+        List<Loans> loans = loansFeignClient.getLoansDetails(correlationId, customer);
+        List<Cards> cards = cardsFeignClient.getCardDetails(correlationId, customer);
 
         CustomerDetails customerDetails = new CustomerDetails();
         customerDetails.setAccount(account);
@@ -63,9 +63,9 @@ public class AccountController {
     }
 
     // Fallback method for circuit breaker detailsForCustomerSupportApp
-    public CustomerDetails myCustomerDetailsFallBack(Customer customer, Throwable t) {
+    public CustomerDetails myCustomerDetailsFallBack(@RequestHeader("bank-service-correlation-id") String correlationId, Customer customer, Throwable t) {
         Account account = accountService.getAccountByCustomerId(customer.getCustomerId());
-        List<Loans> loans = loansFeignClient.getLoansDetails(customer);
+        List<Loans> loans = loansFeignClient.getLoansDetails(correlationId, customer);
         CustomerDetails customerDetails = new CustomerDetails();
         customerDetails.setAccount(account);
         customerDetails.setLoans(loans);
