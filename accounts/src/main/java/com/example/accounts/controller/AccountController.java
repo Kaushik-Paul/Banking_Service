@@ -8,8 +8,11 @@ import com.example.accounts.service.clients.LoansFeignClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +20,8 @@ import java.util.List;
 
 @RestController
 public class AccountController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AccountController.class);
 
     @Autowired
     private AccountService accountService;
@@ -46,9 +51,10 @@ public class AccountController {
     }
 
     @PostMapping("/my-customer-details")
-//    @CircuitBreaker(name="detailsForCustomerSupportApp", fallbackMethod = "myCustomerDetailsFallBack")
+    @CircuitBreaker(name = "detailsForCustomerSupportApp", fallbackMethod = "myCustomerDetailsFallBack")
     @Retry(name = "retryForCustomerDetails", fallbackMethod = "myCustomerDetailsFallBack")
     public CustomerDetails myCustomerDetails(@RequestHeader("bank-service-correlation-id") String correlationId, @RequestBody Customer customer) {
+        logger.info("myCustomerDetails() method started");
         Account account = accountService.getAccountByCustomerId(customer.getCustomerId());
         List<Loans> loans = loansFeignClient.getLoansDetails(correlationId, customer);
         List<Cards> cards = cardsFeignClient.getCardDetails(correlationId, customer);
@@ -57,6 +63,7 @@ public class AccountController {
         customerDetails.setAccount(account);
         customerDetails.setLoans(loans);
         customerDetails.setCards(cards);
+        logger.info("myCustomerDetails() method ended");
 
         return customerDetails;
 

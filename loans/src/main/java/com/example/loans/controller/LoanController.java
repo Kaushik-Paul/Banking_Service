@@ -8,6 +8,8 @@ import com.example.loans.service.LoanService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +17,8 @@ import java.util.List;
 
 @RestController
 public class LoanController {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoanController.class);
 
     @Autowired
     private LoanService loanService;
@@ -24,6 +28,8 @@ public class LoanController {
 
     @PostMapping("my-loans")
     public List<Loan> getAllLoanDetails(@RequestHeader("bank-service-correlation-id") String correlationId, @RequestBody Customer customer) {
+        logger.info("getLoansDetails() method started");
+        logger.info("getLoansDetails() method ended");
         return loanService.loanDetails(customer.getCustomerId());
     }
 
