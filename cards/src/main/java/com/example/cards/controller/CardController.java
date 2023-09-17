@@ -30,6 +30,7 @@ public class CardController {
     @PostMapping("my-cards")
     public List<Card> getCardDetailsOfCustomer(@RequestHeader("bank-service-correlation-id") String correlationId, @RequestBody Customer customer) {
         logger.info("getCardDetails() method started");
+        logger.info("getCardDetails() method ended");
         return cardService.getAllCardDetails(customer.getCustomerId());
     }
 
